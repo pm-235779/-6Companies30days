@@ -1,0 +1,22 @@
+class Solution {
+public:
+    int maxSumBST(TreeNode* root) {
+        int max_sum = 0;
+        using Retval = tuple<bool,int,int,int>; // is_bst, subtree_sum, maxval, minval
+        function<Retval(TreeNode*)> dfs = [&](TreeNode* node) -> Retval
+        {
+            if (node == nullptr) return {true, 0, INT_MIN, INT_MAX};
+            auto [left_is_bst, left_sum, left_max, left_min] = dfs(node->left);
+            auto [right_is_bst, right_sum, right_max, right_min] = dfs(node->right);
+            auto is_bst = left_is_bst && right_is_bst && node->val > left_max && node->val < right_min;
+            auto subtree_sum = node->val + left_sum + right_sum;
+            if (is_bst) max_sum = max(max_sum, subtree_sum);
+            return {is_bst, subtree_sum, 
+                    max(node->val, max(right_max, left_max)), 
+                    min(node->val, min(left_min, right_min))};
+        };
+        
+        (void) dfs(root);
+        return max_sum;
+    }
+};
